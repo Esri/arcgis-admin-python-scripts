@@ -1,4 +1,4 @@
-This repo will hold a set of Python scripts to facilitate performing various administrative tasks by an admin. More sctipts will be added in the near future, and everyone with access to this repo can contribute. Where possible I will try to include both Python 2 versions of the scripts using the ArcGIS rest api and fairly agnostic functions. And I will also provide Python 3 versions of the scripts leveraging our new [ArcGIS Python Beta API](https://developers.arcgis.com/python/). 
+This repo will hold a set of Python scripts to facilitate performing various administrative tasks by an admin. More sctipts will be added in the near future, and everyone with access to this repo can contribute. Where possible I will try to include both Python 2 versions of the scripts using the ArcGIS rest api and fairly agnostic functions. And I will also provide Python 3 versions of the scripts leveraging our new [ArcGIS Python Beta API](https://developers.arcgis.com/python/).
 
 ####Required to run:
 *Python 2
@@ -25,3 +25,8 @@ This script will look through all the files in a directory and if any valid meta
 
 
 
+
+###To test
+1. Log in to portal and download the metadata of agol item in your content.
+1. Save the file to the same directory as this script.
+1. Execute the script.
