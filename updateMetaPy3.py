@@ -1,45 +1,53 @@
+#imports the required libraries and resources to run this script
 import argparse
 import os
-import arcgis
 import json
 from xml.etree import ElementTree
 from arcgis.gis import GIS
 import csv
 import datetime
+import pdb
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-u', '--portal', help = ('url of the portal'))
-	parser.add_argument('-o', '--username', required=True, help='username')
-	parser.add_argument('-s', '--password')
-	parser.add_argument('-p', '--path', help = 'path to metadata file')
-	parser.add_argument('-i', '--itemId', help = 'id of the item to be updated')
+	parser.add_argument('-a', '--portal', required=True, help=('url of the portal'))
+	parser.add_argument('-u', '--username', required=True, help=('username'))
+	parser.add_argument('-p', '--password', required=True, help=('password'))
+	parser.add_argument('-f', '--path', help=('path to directory holding metadata files to update'))
 
 	args = parser.parse_args()
 	portal =  args.portal
 	username = args.username
 	password = args.password
-	itemId = args.itemId
 	path = args.path
-
+	badKey = None
 
 	gis = GIS(url=portal, username=username, password=password)
-	print (gis)
+
+	try:
+		if gis.properties['user']:
+			gis = GIS(url=portal, username=username, password=password)
+
+	except KeyError as e:
+		badKey = e
+		pass
 
 	#will only run if a valid connection to a portal was made
-	if gis != None:
+	if badKey == None:
+
 		#a list holding the files in the current directory
 		folder = os.listdir(os.curdir)
 		metaDataList = []
 		badFiles = []
 		badFilesDict = {}
+		# itemId = ''
 
 		#Checks every file in the directory, and adds valid metadata files to a list
 		for file in folder:
 			fullFile = os.path.abspath(file)
 			try:
 				dom = ElementTree.parse(fullFile)
-				itemId = dom.find('mdFileID').text
+				itemId = dom.findtext('mdFileID')
 			except Exception as e:
 				badFilesDict[file] = e
 				pass
@@ -54,17 +62,6 @@ if __name__=='__main__':
 
 			try:
 				item = gis.content.get(itemId)
-				if item['ownerFolder']:
-					print("item id: ", item.id)
-					print("title: ", item.title)
-					print("\n")
-
-				else:
-					item['ownerFolder'] = ''
-					print("item id: ", item.id)
-					print("title: ", item.title)
-					print("\n")
-
 			except Exception as e:
 				pass
 
@@ -86,7 +83,6 @@ if __name__=='__main__':
 					writer.writerow({'TITLE':item.title, 'ID':item.id, 'UPDATED':update, 'DATE/TIME':currentTime, 'FILE': file})
 
 			except KeyError as b:
-				print (b)
 				pass
 
 		for key, value in badFilesDict.items():
@@ -97,9 +93,10 @@ if __name__=='__main__':
 
 				if errorReportExists == False:
 					writer.writeheader()
-				writer.writerow({'FILE': key,'ERROR': value, 'DATE/TIME':currentTime})
+				writer.writerow({'FILE': key,'ERROR': value, 'DATE/TIME':datetime.datetime.now()})
 
 
 		print ("Updating complete")
 	else:
-		print("\nCould not generate a valid token. Check your credentials.")
+		pass
+		# print("\nInvalid log in attempt. Check your credentials.")
