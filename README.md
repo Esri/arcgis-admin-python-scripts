@@ -20,7 +20,7 @@ This script will look through all the files in a directory and if any valid meta
 
 Note: There is no universal installation of Python 3 currently so you will have to be sure that you're calling the exact same version of python 3 where you installed the ArcGIS Beta API. Using the command `which python3` will return the path to your current default python 3, and is a useful tool for verifying. The python 3 version you want to use for this script should be in your /anaconda/bin directory.
 
-![alt text](https://github.com/ArcGIS/python-admin/blob/master/Screen%20Shot%202016-08-21%20at%209.51.02%20PM.png "which python3 example")
+![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/1.png "which python3 example")
 
 
 
@@ -49,12 +49,13 @@ flags scripts accepts:
 1. Click on the username dropdown in the upper right corner.
 1. Click on your username to be taken to your user profile page.
 1. Click on 'My Content' at the top of the page and you will be shown a view of all your items similar to the example photo below.
+![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/2.png "My Content")
 1. Click on an item to view a detailed page for that item. 
 1. On the right hand side of the page you should see see a set of buttons, some with dropdown funtionality. 
- ![alt text](https://github.com/ArcGIS/python-admin/blob/master/Screen%20Shot%202016-08-21%20at%2010.14.50%20PM.png "detailed page")
+ ![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/3.png "detailed page")
 1. Click the Metadata dropdown, and then choose "edit"
 1. Click the "Save Local Copy" button to download the metadata in the form of an xml file for that item.
-![alt text](https://github.com/ArcGIS/python-admin/blob/master/Screen%20Shot%202016-08-21%20at%2010.20.48%20PM.png "save local copy example")
+![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/4.png "save local copy example")
 1. Edit the metadata as you like, being careful not to edit the `<mdFileID>` field at all.
 1. Run the script from the same directory as the xml file you downloaded and edited.
 1. When completed, verify that the changes you made to your local file are reflected in the corresponding item online.
