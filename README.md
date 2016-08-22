@@ -1,4 +1,4 @@
-This repo will hold a set of Python scripts to facilitate performing various administrative tasks by an admin. More sctipts will be added in the near future, and everyone with access to this repo can contribute. Where possible I will try to include both Python 2 versions of the scripts using the ArcGIS rest api and fairly agnostic functions. And I will also provide Python 3 versions of the scripts leveraging our new [ArcGIS Python Beta API](https://developers.arcgis.com/python/).
+This repo will hold a set of Python 3 scripts leveraging our new [ArcGIS Python Beta API](https://developers.arcgis.com/python/) to perform various administrative tasks by an admin. More scripts will be added in the near future, and everyone with access to this repo is encouraged to contribute to it. Where possible I will try to include Python 2 versions of the scripts using the ArcGIS rest api and fairly generic functions.
 
 ####Required to run:
 *Python 2
@@ -11,34 +11,46 @@ This repo will hold a set of Python scripts to facilitate performing various adm
 
 ##Scripts included
 
+####[updateMetaPy3.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy3.py)
+This script will look through all the files in a directory and if any valid metadata files are available, it will update that respective item in agol with the local metadata file. When completed it will produce 2 files. `report.csv` is a list of the Agol items and times they were updated. `errors.csv` is a list of the files in the directory that were not updated and the error message. This is for python 3 and makes use of the ArcGIS Python Beta API
+
+#####Example
+`python3 updateMetaPy3.py -u <username> -p <password> -a https://opendata.arcgis.com`
+
+Note: There is no universal installation of Python 3 currently so you will have to be sure that you're calling the exact same version of python 3 where you installed the ArcGIS Beta API. Using the command `which python3` will return the path to your current default python 3, and is a useful tool for verifying. The python 3 version you want to use for this script should be in your /anaconda/bin directory.
+
+
+
 ####[updateMetaPy2.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy2.py)
 This script will look through all the files in a directory and if any valid metadata files are available, it will update the respective item in agol with that metadata file. When completed, it will produce 2 files. `report.csv` is a list of the items and times they were updated. `errors.csv` is a list of the files in the directory that were not updated and the error message. This is for python 2 and aside from the `requests` package every library it uses is included in the python standard library.
 
-flags it accepts:  
+
+
+
+flags scripts accepts:  
   * `-a` this flag specifies which ArcGIS portal you want to administer __[required]__    
   * `-u` this flag sets the username to log in with __[required]__    
   * `-p` this flag sets the password associated with the username __[required]__    
-  * `-f` this flag specifies the file path to the directory containing the metadata files to be uploaded __[optional]__  
 
-#####Example without optional path flag
+
+#####Example 
 `python updateMetaPy2.py -u <username> -p <password> -a https://opendata.arcgis.com`
 
 
-####Example with optional path flag
-`python updateMetaPy2.py -u <username> -p <password> -a <portal> -f </path/to/metadata/directory>`
 
 
+###Accessing Your Metadata
+1. Log in to your opendata portal.
+	e.g. http://opendata.arcgis.com
 
-####[updateMetaPy3.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy3.py)
-This script will look through all the files in a directory and if any valid metadata files are available, it will update the respective item in agol with that metadata file. When completed, it will produce 2 files. `report.csv` is a list of the items and times they were updated. `errors.csv` is a list of the files in the directory that were not updated and the error message. This is for python 3 and makes use of the ArcGIS Python Beta API
+1. Click on the username dropdown in the upper right corner.
+1. Click on your username to be taken to your user profile page.
+1. Click on 'My Content' at the top of the page and you will be shown a view of all your items similar to the example photo below.
+1. Click on an item to view a detailed page for that item. 
+1. On the right hand side of the page you should see see a set of buttons, some with dropdown funtionality. 
+1. Click the Metadata dropdown, and then choose "edit"
+1. Select the "Save a local copy" button to download the metadata in the form of an xml file for that item.
+1. Edit the metadata as you like, being careful not to edit the `<mdFileID>` field at all.
+1. Run the script from the same directory as the xml file you downloaded and edited.
+1. When completed, verify that the changes you made to your local file are reflected in the corresponding item online.
 
-#####Example
-`python3 updateMetaPy3.py -o <username> -s <password> -u `
-
-
-
-
-###To test
-1. Log in to portal and download the metadata of agol item in your content.
-1. Save the file to the same directory as this script.
-1. Execute the script.

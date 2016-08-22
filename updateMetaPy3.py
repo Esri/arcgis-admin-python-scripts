@@ -6,33 +6,33 @@ from xml.etree import ElementTree
 from arcgis.gis import GIS
 import csv
 import datetime
-import pdb
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-a', '--portal', required=True, help=('url of the portal'))
 	parser.add_argument('-u', '--username', required=True, help=('username'))
 	parser.add_argument('-p', '--password', required=True, help=('password'))
-	parser.add_argument('-f', '--path', help=('path to directory holding metadata files to update'))
+	# parser.add_argument('-f', '--path', help=('path to directory holding metadata files to update'))
 
 	args = parser.parse_args()
 	portal =  args.portal
 	username = args.username
 	password = args.password
-	path = args.path
+	# userPath = args.path
 	badKey = None
+
 
 	gis = GIS(url=portal, username=username, password=password)
 
 	try:
 		if gis.properties['user']:
-			gis = GIS(url=portal, username=username, password=password)
+			pass
 
 	except KeyError as e:
 		badKey = e
 		pass
 
-	#will only run if a valid connection to a portal was made
+	#will only execute if a valid credentials were entered to generate a valid token
 	if badKey == None:
 
 		#a list holding the files in the current directory
@@ -40,37 +40,43 @@ if __name__=='__main__':
 		metaDataList = []
 		badFiles = []
 		badFilesDict = {}
-		# itemId = ''
 
 		#Checks every file in the directory, and adds valid metadata files to a list
 		for file in folder:
+			itemId = None
 			fullFile = os.path.abspath(file)
 			try:
 				dom = ElementTree.parse(fullFile)
-				itemId = dom.findtext('mdFileID')
+				if dom.findtext('mdFileID'):
+					itemId = dom.findtext('mdFileID')
+
 			except Exception as e:
 				badFilesDict[file] = e
 				pass
 
-			if file[-4:] == '.xml' and itemId:
+			if file[-4:] == '.xml' and itemId != None:
 				metaDataList.append(file)
 
+		count = 0
 		for file in metaDataList:
 			fullFile = os.path.abspath(file)
 			dom = ElementTree.parse(fullFile)
-			itemId = dom.find('mdFileID').text
-
+			itemId = dom.findtext('mdFileID')
 			try:
 				item = gis.content.get(itemId)
 			except Exception as e:
 				pass
 
 			try:
+				count+=1
 				update = item.update(metadata=file)
 				currentTime = datetime.datetime.now()
 
-				print("Status: ", update)
-				print("Updated: ", itemId)
+				print("#{}".format(count))
+				print("title: {}".format(item.title))
+				print("item id: {}".format(itemId))
+				print("updated: ", update)
+				print("time: ", datetime.datetime.now(), "\n")
 
 				reportExists = os.path.isfile('report.csv')
 
@@ -85,6 +91,7 @@ if __name__=='__main__':
 			except KeyError as b:
 				pass
 
+
 		for key, value in badFilesDict.items():
 			errorReportExists = os.path.isfile('errors.csv')
 			with open('errors.csv', 'a') as csvfile:
@@ -96,7 +103,6 @@ if __name__=='__main__':
 				writer.writerow({'FILE': key,'ERROR': value, 'DATE/TIME':datetime.datetime.now()})
 
 
-		print ("Updating complete")
+		print ("Updating complete. {} items updated.".format(count))
 	else:
 		pass
-		# print("\nInvalid log in attempt. Check your credentials.")
