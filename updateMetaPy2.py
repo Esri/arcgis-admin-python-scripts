@@ -96,7 +96,6 @@ if __name__=='__main__':
 			try:
 				count+=1
 				update = updateMetaData(username, item['ownerFolder'], itemId, fullFile, portal, userToken)
-				currentTime = datetime.datetime.now()
 
 				print "#{}".format(count)
 				print "title: {}".format(item['title'])
@@ -126,7 +125,7 @@ if __name__=='__main__':
 
 				if errorReportExists == False:
 					writer.writeheader()
-				writer.writerow({'FILE': key,'ERROR': value, 'DATE/TIME':currentTime})
+				writer.writerow({'FILE': key,'ERROR': value, 'DATE/TIME':datetime.datetime.now()})
 
 		print ("Updating complete. {} items updated.".format(count))
 	else:

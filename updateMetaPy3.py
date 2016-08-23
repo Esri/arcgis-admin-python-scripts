@@ -75,7 +75,7 @@ if __name__=='__main__':
 				print("#{}".format(count))
 				print("title: {}".format(item.title))
 				print("item id: {}".format(itemId))
-				print("updated: ", update)
+				print("updated: {}".format(update))
 				print("time: ", datetime.datetime.now(), "\n")
 
 				reportExists = os.path.isfile('report.csv')
