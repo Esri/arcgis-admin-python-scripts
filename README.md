@@ -52,9 +52,7 @@ flags scripts accepts:
 `python3 updateMetaPy3.py -u <username> -p <password> -a https://www.arcgis.com`
 
 Once the script is completed. Refer to step 7 above but instead of clicking edit, this time click view to observe your changes. Below are two screenshots of the metadata pre and post edit.
-![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/6.png "before editing")
-
-![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/7.png "after editing")
+![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/6_7.png "before editing and after editing")
 
 
 ####Python 2 support
