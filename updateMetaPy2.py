@@ -40,18 +40,16 @@ def getItemData(itemId, portal, token):
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-u', '--portal', help = ('url of the portal'))
-	parser.add_argument('-o', '--username', required=True, help='username')
-	parser.add_argument('-s', '--password')
-	parser.add_argument('-p', '--path', help = 'path to metadata file')
-	parser.add_argument('-i', '--itemId', help = 'id of the item to be updated')
+	parser.add_argument('-a', '--portal', help = ('url of the portal'))
+	parser.add_argument('-u', '--username', required=True, help=('username'))
+	parser.add_argument('-p', '--password', required=True, help=('password'))
+	#parser.add_argument('-f', '--path', help=('path to directory holding metadata files to update'))
 
 	args = parser.parse_args()
 	portal =  args.portal
 	username = args.username
 	password = args.password
-	itemId = args.itemId
-	path = args.path
+	# userPath = args.path
 
 
 	userToken = genToken(username, password, portal)
@@ -66,44 +64,45 @@ if __name__=='__main__':
 
 		#Checks every file in the directory, and adds valid metadata files to a list
 		for file in folder:
+			itemId = None
 			fullFile = os.path.abspath(file)
 			try:
 				dom = ElementTree.parse(fullFile)
-				itemId = dom.find('mdFileID').text
+				if dom.findtext('mdFileID'):
+					itemId = dom.findtext('mdFileID')
 			except Exception as e:
 				badFilesDict[file] = e
 				pass
 
-			if file[-4:] == '.xml' and itemId:
+			if file[-4:] == '.xml' and itemId != None:
 				metaDataList.append(file)
-
+		count = 0
 		for file in metaDataList:
 			fullFile = os.path.abspath(file)
 			dom = ElementTree.parse(fullFile)
-			itemId = dom.find('mdFileID').text
+			itemId = dom.findtext('mdFileID')
 
 			try:
 				item = getItemData(itemId, portal, userToken)
-				if item['ownerFolder']:
-					print "item id: ", item['id']
-					print"title: ", item['title']
-					print"\n"
-
-				else:
-					item['ownerFolder'] = ''
-					print "item id: ", item['id']
-					print "title: ", item['title']
-					print "\n"
-
 			except Exception as e:
 				pass
 
+			if item['ownerFolder']:
+				pass
+
+			else:
+				item['ownerFolder'] = ''
+
 			try:
+				count+=1
 				update = updateMetaData(username, item['ownerFolder'], itemId, fullFile, portal, userToken)
 				currentTime = datetime.datetime.now()
 
-				print "Status: ", update['success']
-				print "Updated: ", itemId
+				print "#{}".format(count)
+				print "title: {}".format(item['title'])
+				print "item id: {}".format(itemId)
+				print "updated: {}".format(update['success'])
+				print "time: ", datetime.datetime.now(), "\n"
 
 				reportExists = os.path.isfile('report.csv')
 
@@ -113,12 +112,11 @@ if __name__=='__main__':
 
 					if reportExists == False:
 						writer.writeheader()
-					writer.writerow({'TITLE':item['title'], 'ID':item['id'], 'UPDATED':update['success'], 'DATE/TIME':currentTime, 'FILE': file})
+					writer.writerow({'TITLE':item['title'], 'ID':item['id'], 'UPDATED':update['success'], 'DATE/TIME':datetime.datetime.now(), 'FILE': file})
 
 			except KeyError as b:
 				print b
 				pass
-
 
 		for key, value in badFilesDict.items():
 			errorReportExists = os.path.isfile('errors.csv')
@@ -130,7 +128,6 @@ if __name__=='__main__':
 					writer.writeheader()
 				writer.writerow({'FILE': key,'ERROR': value, 'DATE/TIME':currentTime})
 
-
-		print "Updating complete"
+		print ("Updating complete. {} items updated.".format(count))
 	else:
 		print "\nCould not generate a valid token. Check your credentials."

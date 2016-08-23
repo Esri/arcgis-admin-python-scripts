@@ -86,7 +86,7 @@ if __name__=='__main__':
 
 					if reportExists == False:
 						writer.writeheader()
-					writer.writerow({'TITLE':item.title, 'ID':item.id, 'UPDATED':update, 'DATE/TIME':currentTime, 'FILE': file})
+					writer.writerow({'TITLE':item.title, 'ID':item.id, 'UPDATED':update, 'DATE/TIME':datetime.datetime.now(), 'FILE': file})
 
 			except KeyError as b:
 				pass

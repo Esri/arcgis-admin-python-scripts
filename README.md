@@ -67,4 +67,4 @@ This script will look through all the files in a directory and if any valid meta
   * Requests [link](http://docs.python-requests.org/en/master/)
 
   #####Example
-  `python updateMetaPy2.py -u <username> -p <password> -a https://dcdev.maps.arcgis.com`
+  `python updateMetaPy2.py -u <username> -p <password> -a https://www.arcgis.com`
