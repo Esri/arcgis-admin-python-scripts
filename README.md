@@ -1,8 +1,8 @@
 
-####Introduction
+##Introduction
 This repo will hold a set of Python 3 scripts leveraging our new [ArcGIS Python Beta API](https://developers.arcgis.com/python/) to perform various administrative tasks by an admin. More scripts will be added in the near future, and everyone with access to this repo is encouraged to contribute to it.
 
-####Requirements and Installation
+##Requirements and Installation
 
 To run the script you'll need to install the following dependencies.
 
@@ -17,7 +17,7 @@ bash-3.2$ which python3
 /Users/<user_name>/anaconda/bin/python3
 ```
 
-####Preparing your MetaData for update
+##Preparing your MetaData for update
 1. Log in to your open data site.
 	e.g. http://www.arcgis.com
 1. Click on the username dropdown in the upper right corner.
@@ -38,9 +38,9 @@ bash-3.2$ which python3
 
 
 
-####Run the update script
+##Run the update script
 
-####[updateMetaPy3.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy3.py)
+##[updateMetaPy3.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy3.py)
 This script will look through all files in a directory and if any valid metadata files are available, it will update that respective item in ArcGIS Online with the local metadata file. When completed it will produce 2 files. `report.csv` is a list of the ArcGIS Online items and times they were updated. `errors.csv` is a list of the files in the directory that were not valid metadata and the error message. This is for python 3 and makes use of the ArcGIS Python Beta API
 
 flags scripts accepts:  
@@ -48,20 +48,20 @@ flags scripts accepts:
   * `-u` this flag sets the username to log in with __[required]__    
   * `-p` this flag sets the password associated with the username __[required]__    
 
-#####Example
+##Example
 `python3 updateMetaPy3.py -u <username> -p <password> -a https://www.arcgis.com`
 
 Once the script is completed. Refer to step 7 above but instead of clicking edit, this time click view to observe your changes. Below are two screenshots of the metadata pre and post edit.
 ![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/6_7.jpg "before editing and after editing")
 
 
-####Python 2 support
+###Python 2 support
 Where possible I will try to include Python 2 versions of the scripts using the ArcGIS rest api and fairly generic functions, but support for Python 2 is not guaranteed moving forward, and using our new Python 3 API is highly encouraged.
 
-####[updateMetaPy2.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy2.py)
+###[updateMetaPy2.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy2.py)
 This script will look through all the files in a directory and if any valid metadata files are available, it will update the respective item in agol with that metadata file. When completed, it will produce 2 files. `report.csv` is a list of the items and times they were updated. `errors.csv` is a list of the files in the directory that were not updated and the error message. This is for python 2 and aside from the `requests` package every library it uses is included in the python standard library.
 
-####Required to run:
+###Required to run:
 * Python 2
 
   * Requests [link](http://docs.python-requests.org/en/master/)
@@ -70,11 +70,11 @@ This script will look through all the files in a directory and if any valid meta
   `python updateMetaPy2.py -u <username> -p <password> -a https://www.arcgis.com`
 
 
-## Contributing
+##Contributing
 
 Anyone and everyone is welcome to contribute. Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
-## Licensing
+##Licensing
 Copyright 2016 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
