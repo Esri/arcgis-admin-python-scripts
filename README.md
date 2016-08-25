@@ -55,13 +55,13 @@ Once the script is completed. Refer to step 7 above but instead of clicking edit
 ![alt text](https://github.com/ArcGIS/python-admin/blob/master/images/6_7.jpg "before editing and after editing")
 
 
-###Python 2 support
+####Python 2 support
 Where possible I will try to include Python 2 versions of the scripts using the ArcGIS rest api and fairly generic functions, but support for Python 2 is not guaranteed moving forward, and using our new Python 3 API is highly encouraged.
 
-###[updateMetaPy2.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy2.py)
+##[updateMetaPy2.py](https://github.com/ArcGIS/python-admin/blob/master/updateMetaPy2.py)
 This script will look through all the files in a directory and if any valid metadata files are available, it will update the respective item in agol with that metadata file. When completed, it will produce 2 files. `report.csv` is a list of the items and times they were updated. `errors.csv` is a list of the files in the directory that were not updated and the error message. This is for python 2 and aside from the `requests` package every library it uses is included in the python standard library.
 
-###Required to run:
+####Required to run:
 * Python 2
 
   * Requests [link](http://docs.python-requests.org/en/master/)
