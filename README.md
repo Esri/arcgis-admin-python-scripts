@@ -18,7 +18,7 @@ bash-3.2$ which python3
 ```
 
 ##Preparing your MetaData for update
-1. Log in to your open data site.
+1. Log in to your ArcGIS site.
 	e.g. http://www.arcgis.com
 1. Click on the username dropdown in the upper right corner.
 1. Click on your username to be taken to your user profile page.
@@ -44,7 +44,7 @@ bash-3.2$ which python3
 This script will look through all files in a directory and if any valid metadata files are available, it will update that respective item in ArcGIS Online with the local metadata file. When completed it will produce 2 files. `report.csv` is a list of the ArcGIS Online items and times they were updated. `errors.csv` is a list of the files in the directory that were not valid metadata and the error message. This is for python 3 and makes use of the ArcGIS Python Beta API
 
 flags scripts accepts:  
-  * `-a` this flag specifies which open data site you want to administer __[required]__    
+  * `-a` this flag specifies sets the GIS you want to administer __[required]__    
   * `-u` this flag sets the username to log in with __[required]__    
   * `-p` this flag sets the password associated with the username __[required]__    
 
