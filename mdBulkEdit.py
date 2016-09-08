@@ -2,8 +2,9 @@
 import argparse
 import os
 import json
-from xml.etree import ElementTree
+# from xml.etree import ElementTree
 import xml.etree.ElementTree as xml
+from lxml import etree
 from arcgis.gis import GIS
 import csv
 import datetime
@@ -20,56 +21,55 @@ def generateSeedXml(x):
     '''
 
     try:
-        root = xml.Element("metadata")
+        root = etree.Element("metadata")
 
-        mdFileID = xml.SubElement(root, "mdFileID")
+        mdFileID = etree.SubElement(root, "mdFileID")
         mdFileID.text = x.itemid
 
-
-        resTitle = xml.SubElement(root, "resTitle")
+        resTitle = etree.SubElement(root, "resTitle")
         resTitle.text = x.title
-
 
         if x.tags:
             if type(x.tags) == list:
                 for tag in x.tags:
-                    keyword = xml.SubElement(root, "keyword")
+                    keyword = etree.SubElement(root, "keyword")
                     keyword.text = tag
             else:
-                keyword = xml.SubElement(root, "keyword")
+                keyword = etree.SubElement(root, "keyword")
                 keyword.text = x.tags
 
-
-
-
         if x.description:
-            idAbs = xml.SubElement(root, "idAbs")
+            idAbs = etree.SubElement(root, "idAbs")
             idAbs.text = x.description
 
         if x.licenseInfo:
-            useLimit = xml.SubElement(root, "useLimit")
+            useLimit = etree.SubElement(root, "useLimit")
             useLimit.text = x.licenseInfo
 
         if x.url:
-            linkage = xml.SubElement(root, "linkage")
+            linkage = etree.SubElement(root, "linkage")
             linkage.text = x.url
 
-        # pdb.set_trace()
+        tree = etree.tostring(root, pretty_print=True)
 
-        tree = xml.ElementTree(root)
+        #writes the formatted xml to a file
         with open("{}_metadata.xml".format(x.title), "wb") as fh:
-            newFile = tree.write(fh)
+            fh.write(tree)
+            fh.close()
 
         metaDataFile = os.path.abspath('{}_metadata.xml'.format(x.title))
+
+        '''renames and copies the metadata file to the downloaded directory and optionally
+           removes the original file
+        '''
         copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(x.title, x.id))
 
         #removes the metadata file once it's copied to another directory
         # os.remove(metaDataFile)
+
     except Exception as B:
         print (B)
-
     return
-
 
 
 if __name__ =='__main__':
@@ -100,20 +100,24 @@ if __name__ =='__main__':
     failCount = 0
     successCount = 0
 
-    #loops through every folder and every item in those folders
+    '''loops through every folder and every item in those folders in search of public
+        open data items'''
     for folder in allItems:
         for item in allItems[folder]:
             if item.licenseInfo and item.access == 'public':
                 totalCount+=1
+
                 try:
                     metaDataFile = item.download_metadata(dir=os.getcwd())
+                    
                     metaDataFile = os.path.abspath(metaDataFile)
 
                     newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
 
                     #parses the xml file and assigns the root element
-                    dom = ElementTree.parse(newFile)
+                    dom = etree.parse(newFile)
                     root = dom.getroot()
+
                     print ("{}. {} downloaded successfully".format(totalCount, item.title))
                     successCount+=1
 
@@ -157,10 +161,12 @@ if __name__ =='__main__':
 
                 except Exception as E:
                     failCount += 1
-                    generateSeedXml(item)
-
+                    generatedItem = generateSeedXml(item)
                     print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
                     pass
+
+                # finally
+
             else:
                 pass
 
