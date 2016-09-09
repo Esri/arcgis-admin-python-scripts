@@ -2,7 +2,6 @@
 import argparse
 import os
 import json
-# from xml.etree import ElementTree
 import xml.etree.ElementTree as xml
 from lxml import etree
 from arcgis.gis import GIS
@@ -19,7 +18,6 @@ def generateSeedXml(x):
     This function takes in an arcgis online item passed in to it, and generates some basic
     metadata for that item and copies that file to the child directory with the other metadata files.
     '''
-
     try:
         root = etree.Element("metadata")
 
@@ -69,8 +67,33 @@ def generateSeedXml(x):
 
     except Exception as B:
         print (B)
+        print('>>>3.', type(metaDataFile))
+    return metaDataFile
+
+
+def uploadSeedXml(seedFile):
+    '''
+    this function accepts the path to an xml metadata file to upload to AGOL.
+    this is necessarry to gain the ability to pull download metadata for that
+    item for the first time
+    '''
+
+    dom = etree.parse(seedFile)
+    root = dom.getroot()
+
+    itemId = dom.findtext('mdFileID')
+    
+    try:
+        item = gis.content.get(itemId)
+    except Exception as e:
+        pass
+    update = item.update(metadata=seedFile)
+
     return
 
+
+
+#------------------------------------------------------------------------------------------#
 
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
@@ -92,8 +115,7 @@ if __name__ =='__main__':
     except Exception as e:
         pass
 
-    # an empty list to hold items with no license
-    noLicense = []
+ 
 
     #counters
     totalCount = 0
@@ -109,24 +131,24 @@ if __name__ =='__main__':
 
                 try:
                     metaDataFile = item.download_metadata(dir=os.getcwd())
-                    
+                        
                     metaDataFile = os.path.abspath(metaDataFile)
-
                     newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
-
                     #parses the xml file and assigns the root element
+                    
                     dom = etree.parse(newFile)
                     root = dom.getroot()
 
+                    
                     print ("{}. {} downloaded successfully".format(totalCount, item.title))
                     successCount+=1
 
                     # a dictionary holidng the fieldnames for the csv
-                    fieldnames = {'ArcGISProfile':'None', 'ArcGISstyle':'None', 'ArcGISFormat':'None',
+                    fieldnames = {'ArcGISProfile':'None', 'ArcGISstyle':'None', 'ArcGISFormat':1.0,
                                 'CreaDate':'None', 'linkage':'None', 'mdDateSt':'None', 'CreaTime':'None',
                                 'useLimit':'None', 'resTitle':'None', 'metadata':'None', 'ModTime':'None',
-                                'mdFileID':'None', 'keyword':'None', 'ModDate':'None', 'mdChar':'None',
-                                'PublishStatus':'None', 'RoleCd':'None', 'CharSetCd':'None'}
+                                'mdFileID':'None', 'keyword':'None', 'ModDate':'None', 'PublishStatus':'None', 
+                                'RoleCd':'None', 'CharSetCd':'None'}
 
                     # creates a hash of all the xml fields in the current metadata
                     tempDict = {}
@@ -161,15 +183,13 @@ if __name__ =='__main__':
 
                 except Exception as E:
                     failCount += 1
-                    generatedItem = generateSeedXml(item)
+
+                    metaDataFile = generateSeedXml(item)
                     print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
+                    uploadSeedXml(metaDataFile)
                     pass
 
-                # finally
-
-            else:
-                pass
 
     #removes the file file metadata.xml that essentially just a temportary staging file
-    # os.remove('metadata.xml')
+    os.remove('metadata.xml')
     print ("\n{} / {} downloaded successfully. {} had to be generated ".format(successCount, totalCount, failCount))
