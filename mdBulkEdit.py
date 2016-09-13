@@ -25,26 +25,12 @@ def generateSeedXml(x):
         
         resTitle = etree.SubElement(idCitation, "resTitle")
         resTitle.text = x.title
-
-        date = etree.SubElement(idCitation, "date")
-        pubDate = etree.SubElement(date, "pubDate")
         
         if x.description:
             idAbs = etree.SubElement(dataIdInfo, "idAbs")
             idAbs.text = x.description
 
-        dataLang = etree.SubElement(idCitation, "dataLang")
-        languageCode = etree.SubElement(dataLang, "languageCode")
-        languageCode.set("value", "eng")
-
-
-        dataChar = etree.SubElement(idCitation, "dataChar")
-        CharSetCd = etree.SubElement(dataChar, "CharSetCd")
-        CharSetCd.set("value","004" )
-
-        tpCat = etree.SubElement(idCitation, "tpCat")
-        TopicCatCd = etree.SubElement(tpCat, "TopicCatCd")
-
+    
         searchKeys = etree.SubElement(idCitation, "searchKeys")
         if x.tags:
             if type(x.tags) == list:
@@ -67,10 +53,7 @@ def generateSeedXml(x):
         ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
         ArcGISstyle.text = "ISO 19139 Metadata Implementation Specification" #needs to go in the dictionary
 
-        CreaDate = etree.SubElement(Esri, "CreaDate")
-        CreaTime = etree.SubElement(Esri, "CreaTime")
-        ModDate = etree.SubElement(Esri, "ModDate")
-        ModTime = etree.SubElement(Esri, "ModTime")
+       
         ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
         ArcGISFormat.text = "1.0"
         ArcGISProfile = etree.SubElement(Esri, "ArcGISProfile")
@@ -80,17 +63,9 @@ def generateSeedXml(x):
         mdFileID = etree.SubElement(root, "mdFileID")
         mdFileID.text = x.itemid
 
-        mdChar = etree.SubElement(root, "mdChar")
-        CharSetCd = etree.SubElement(mdChar, "CharSetCd")
-        CharSetCd.set("value", "004")
-
+        
         mdContact = etree.SubElement(root, "mdContact")
         rpOrgName = etree.SubElement(root, "rpOrgName")
-
-        role = etree.SubElement(root, "role")
-        RoleCd = etree.SubElement(role, "RoleCd")
-        RoleCd.set("value", "007")
-
 
         tree = etree.tostring(root, pretty_print=True)
 
@@ -112,6 +87,7 @@ def generateSeedXml(x):
     except Exception as B:
         print (B)
         print('>>>3.', type(metaDataFile))
+        pass
     return metaDataFile
 
 
@@ -190,13 +166,10 @@ def bulkMdWriter():
                     if row['useLimit']:
                         useLimit.text = row['useLimit']
 
-
                     #ESRI 
                     Esri = etree.SubElement(root, "Esri")
                     ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
                     ArcGISstyle.text = row['ArcGISstyle']
-
-
 
                     CreaDate = etree.SubElement(Esri, "CreaDate")
                     CreaDate.text = row['CreaDate']
@@ -210,14 +183,11 @@ def bulkMdWriter():
                     ModTime = etree.SubElement(Esri, "ModTime")
                     ModTime.text = row['ModTime']
 
-
                     ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
                     ArcGISFormat.text = "1.0"
 
-
                     ArcGISProfile = etree.SubElement(Esri, "ArcGISProfile")
                     ArcGISProfile.text = row['ArcGISProfile']
-
 
                     mdDateSt = etree.SubElement(root, "mdDateSt")
 
@@ -247,11 +217,11 @@ def bulkMdWriter():
                     '''renames and copies the metadata file to the downloaded directory and optionally
                        removes the original file
                     '''
-                    copyfile(metaDataFile, 'downloaded/{}_{}_FULL_metadata.xml'.format(row['resTitle'], row['mdFileID']))
+                    
                     uploadSeedXml(metaDataFile)
 
                     #removes the metadata file once it's copied to another directory
-                    # os.remove(metaDataFile)
+                    os.remove(metaDataFile)
 
             except Exception as B:
                 print(B)
@@ -260,8 +230,7 @@ def bulkMdWriter():
 
 
 
-#------------------------------------------------------------------------------------------#
-
+#Script Starting
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--portal', required=True, help=('url of the portal'))
@@ -352,13 +321,15 @@ if __name__ =='__main__':
 
                         metaDataFile = generateSeedXml(item)
                         print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
-                        uploadSeedXml(metaDataFile)
+                        # uploadSeedXml(metaDataFile)
                         pass
 
 
         #removes the file file metadata.xml that essentially just a temportary staging file
         os.remove('metadata.xml')
-        print ("\n{} / {} downloaded successfully. {} had to be generated. Run the script with the -c flag again. ".format(successCount, totalCount, failCount))
+        print ("\n{} / {} downloaded successfully. {} had to be generated. ".format(successCount, totalCount, failCount))
+        if failCount > 0:
+            print("Run the script with the -c flag again.")
 
     elif args.m and not args.c:
         bulkMdWriter()
