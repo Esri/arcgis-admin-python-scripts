@@ -10,9 +10,6 @@ import datetime
 import time
 from shutil import copyfile
 
-import pdb
-
-
 def generateSeedXml(x):
     '''
     This function takes in an arcgis online item passed in to it, and generates some basic
@@ -91,7 +88,7 @@ def generateSeedXml(x):
     return metaDataFile
 
 
-def uploadSeedXml(seedFile):
+def uploadSeedXml(seedFile, row):
     '''
     this function accepts the path to an xml metadata file to upload to AGOL.
     this is necessarry to gain the ability to pull download metadata for that
@@ -100,14 +97,23 @@ def uploadSeedXml(seedFile):
 
     dom = etree.parse(seedFile)
     root = dom.getroot()
-
     itemId = dom.findtext('mdFileID')
-    
-    try:
-        item = gis.content.get(itemId)
-    except Exception as e:
-        pass
-    update = item.update(metadata=seedFile)
+
+    if row:
+        item_properties = {'title':row['resTitle'], 'tags':row['keyword'], 
+                        'description':row['idAbs'], 'licenseInfo':row['useLimit']}
+        
+        try:
+            item = gis.content.get(itemId)
+        except Exception as e:
+            pass
+        update = item.update(item_properties, metadata=seedFile)
+    else:
+        try:
+            item = gis.content.get(itemId)
+        except Exception as e:
+            pass
+        update = item.update(metadata=seedFile)
 
     return
 
@@ -217,8 +223,8 @@ def bulkMdWriter():
                     '''renames and copies the metadata file to the downloaded directory and optionally
                        removes the original file
                     '''
-                    
-                    uploadSeedXml(metaDataFile)
+                    #uploads the more robust 
+                    uploadSeedXml(metaDataFile, row)
 
                     #removes the metadata file once it's copied to another directory
                     os.remove(metaDataFile)
@@ -321,7 +327,7 @@ if __name__ =='__main__':
 
                         metaDataFile = generateSeedXml(item)
                         print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
-                        # uploadSeedXml(metaDataFile)
+                        uploadSeedXml(metaDataFile, row=False)
                         pass
 
 
