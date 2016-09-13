@@ -62,12 +62,12 @@ flags script accepts:
   * `-u` this flag sets the username to log in with __[required]__    
   * `-p` this flag sets the password associated with the username __[required]__ 
   * `-c` is the optional flag used have the script generate a csv of all your public, open data items.__[optional]__
-  * `-m` is the optional flag used to have the script script build valid xml metadata files from the csv you generated with the `-c` flag.__[optional]__
+  * `-m` is the optional flag used to have the script build valid xml metadata files from the csv you generated with the `-c` flag.__[optional]__
 
 ##Examples
- * `python3 metaDataBulkEdit.py -u <username> -p <password> -a http://www.arcgis.com -c`
+ * `python3 mdBulkEdit.py -u <username> -p <password> -a http://www.arcgis.com -c`
 
- * `python3 metaDataBulkEdit.py -u <username> -p <password> -a http://www.arcgis.com -m`
+ * `python3 mdBulkEdit.py -u <username> -p <password> -a http://www.arcgis.com -m`
 
 
 
