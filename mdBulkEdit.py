@@ -10,7 +10,10 @@ import datetime
 import time
 from shutil import copyfile
 
-def generateSeedXml(x):
+
+
+
+def generateSeedXml(agoItem):
     '''
     This function takes in an arcgis online item passed in to it, and generates some basic
     metadata for that item and copies that file to the child directory with the other metadata files.
@@ -21,29 +24,29 @@ def generateSeedXml(x):
         idCitation = etree.SubElement(dataIdInfo, "idCitation")
         
         resTitle = etree.SubElement(idCitation, "resTitle")
-        resTitle.text = x.title
+        resTitle.text = agoItem.title
         
-        if x.description:
+        if agoItem.description:
             idAbs = etree.SubElement(dataIdInfo, "idAbs")
-            idAbs.text = x.description
+            idAbs.text = agoItem.description
 
     
         searchKeys = etree.SubElement(idCitation, "searchKeys")
-        if x.tags:
-            if type(x.tags) == list:
-                for tag in x.tags:
+        if agoItem.tags:
+            if type(agoItem.tags) == list:
+                for tag in agoItem.tags:
                     keyword = etree.SubElement(searchKeys, "keyword")
                     keyword.text = tag
             else:
                 keyword = etree.SubElement(searchKeys, "keyword")
-                keyword.text = x.tags
+                keyword.text = agoItem.tags
 
         
         resConst = etree.SubElement(idCitation, "resConst")
         Consts = etree.SubElement(resConst, "Consts")
         useLimit = etree.SubElement(Consts, "useLimit")
-        if x.licenseInfo:
-            useLimit.text = x.licenseInfo
+        if agoItem.licenseInfo:
+            useLimit.text = agoItem.licenseInfo
 
         #ESRI 
         Esri = etree.SubElement(root, "Esri")
@@ -58,7 +61,7 @@ def generateSeedXml(x):
 
         mdDateSt = etree.SubElement(root, "mdDateSt")
         mdFileID = etree.SubElement(root, "mdFileID")
-        mdFileID.text = x.itemid
+        mdFileID.text = agoItem.itemid
 
         
         mdContact = etree.SubElement(root, "mdContact")
@@ -67,28 +70,28 @@ def generateSeedXml(x):
         tree = etree.tostring(root, pretty_print=True)
 
         #writes the formatted xml to a file
-        with open("{}_metadata.xml".format(x.title), "wb") as fh:
+        with open("{}_metadata.xml".format(agoItem.title), "wb") as fh:
             fh.write(tree)
             fh.close()
 
-        metaDataFile = os.path.abspath('{}_metadata.xml'.format(x.title))
+        metaDataFile = os.path.abspath('{}_metadata.xml'.format(agoItem.title))
 
         '''renames and copies the metadata file to the downloaded directory and optionally
            removes the original file
         '''
-        copyfile(metaDataFile, 'downloaded/{}_{}_SEED_metadata.xml'.format(x.title, x.id))
+   
+        copyfile(metaDataFile, 'downloaded/{}_{}_SEED_metadata.xml'.format(agoItem.title, agoItem.id))
 
         #removes the metadata file once it's copied to another directory
         # os.remove(metaDataFile)
 
     except Exception as B:
         print (B)
-        print('>>>3.', type(metaDataFile))
         pass
     return metaDataFile
 
 
-def uploadSeedXml(seedFile, row):
+def updateXml(seedFile, row):
     '''
     this function accepts the path to an xml metadata file to upload to AGOL.
     this is necessarry to gain the ability to pull download metadata for that
@@ -120,14 +123,16 @@ def uploadSeedXml(seedFile, row):
 
 def bulkMdWriter():
     '''
-    this function takes a csv as a variable, and produces valid AGOL meta data in the form 
-    of xml files for every entry 
+    this function reads in the csv and produces valid AGOL metadata in the form 
+    of xml files for every row in it
     '''
+    count = 0
     with open ('metaDataTable.csv') as csvfile:
         reader = csv.DictReader(csvfile)
 
         for row in reader:
             try:
+                count += 1
                 root = etree.Element("metadata")
                 dataIdInfo = etree.SubElement(root, "dataIdInfo")
                 idCitation = etree.SubElement(dataIdInfo, "idCitation")
@@ -223,11 +228,13 @@ def bulkMdWriter():
                     '''renames and copies the metadata file to the downloaded directory and optionally
                        removes the original file
                     '''
-                    #uploads the more robust 
-                    uploadSeedXml(metaDataFile, row)
+                    #uploads the more robust metadata as read from the csv
+                    updateXml(metaDataFile, row)
 
                     #removes the metadata file once it's copied to another directory
                     os.remove(metaDataFile)
+
+                    print('{}. {} updated'.format(count, row['resTitle']))
 
             except Exception as B:
                 print(B)
@@ -236,7 +243,7 @@ def bulkMdWriter():
 
 
 
-#Script Starting
+#script starting
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--portal', required=True, help=('url of the portal'))
@@ -259,19 +266,20 @@ if __name__ =='__main__':
     except Exception as e:
         pass
     
-    
+    #checks the flags entered by the user
     if args.c and not args.m:
+        
         #counters
         totalCount = 0
         failCount = 0
         successCount = 0
         reportExists = os.path.isfile('metaDataTable.csv')
 
+        #removes the old csv if it exists and the user wants to generate a new one
         if reportExists == True:
             os.remove('metaDataTable.csv')
 
-        '''loops through every folder and every item in those folders in search of public
-            open data items'''
+        #loops through every item in every folder in search of public open data items
         for folder in allItems:
             for item in allItems[folder]:
                 if item.licenseInfo and item.access == 'public':
@@ -280,6 +288,11 @@ if __name__ =='__main__':
                     try:
                         metaDataFile = item.download_metadata(dir=os.getcwd())
                         metaDataFile = os.path.abspath(metaDataFile)
+
+                        #checks if downloaded folder exists, and creates if it does not
+                        if not os.path.exists('downloaded'):
+                            os.makedirs('downloaded')
+        
                         newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
                         
                         #parses the xml file and assigns the root element
@@ -289,15 +302,13 @@ if __name__ =='__main__':
                         print ("{}. {} downloaded successfully".format(totalCount, item.title))
                         successCount+=1
 
-                        # a dictionary holidng the fieldnames for the csv
+                        #a dictionary holidng the fieldnames for the csv
                         fieldnames = {'ArcGISProfile':'None', 'ArcGISstyle':'None', 'ArcGISFormat':'1.0',
                                     'CreaDate':'None', 'mdDateSt':'None', 'CreaTime':'None',
                                     'useLimit':'None', 'resTitle':'None', 'metadata':'None', 'ModTime':'None',
                                     'mdFileID':'None', 'keyword':'None', 'ModDate':'None', 'PublishStatus':'None', 
                                     'RoleCd':'None', 'CharSetCd':'None', 'idAbs': 'None'}
 
-                        # to store a hash of all the xml fields in the current metadata
-                        tempDict = {}
 
                         for xmlFld in root.iter(): 
                             try:
@@ -309,6 +320,7 @@ if __name__ =='__main__':
                             except:
                                 pass
 
+                        #checks thst the csvfile currently exists, to decide if a header row needs to be printed        
                         reportExists = os.path.isfile('metaDataTable.csv')
                         try:
                             with open('metaDataTable.csv', 'a') as csvfile:
@@ -320,27 +332,35 @@ if __name__ =='__main__':
                                     writer.writerow(fieldnames)
                                     pass
                         except:
+                            print("an error occured while creating the csv")
                             pass
 
                     except Exception as E:
                         failCount += 1
+                        print(E)
 
+                        #generates seed metadata if the script is unable to access the current metadata
                         metaDataFile = generateSeedXml(item)
                         print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
-                        uploadSeedXml(metaDataFile, row=False)
+                        updateXml(metaDataFile, row=False)
                         pass
 
 
         #removes the file file metadata.xml that essentially just a temportary staging file
         os.remove('metadata.xml')
-        print ("\n{} / {} downloaded successfully. {} had to be generated. ".format(successCount, totalCount, failCount))
+        
+        print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
         if failCount > 0:
-            print("Run the script with the -c flag again.")
-
+            print("{} had to be generated. Run the script with the -c flag again.".format(failCount))
+    
+    #if the -m flag is set and valid, the function to create valid xml files from the csv is called
     elif args.m and not args.c:
-        bulkMdWriter()
-        pass
+        try:
+            bulkMdWriter()
+        except Exception as fail:
+            print (fail)
 
+    #error message if user tries to use -c and -m together
     elif args.c and args.m:
         print("Invalid entry. You can't use -c and -m at the same time.")
 
