@@ -88,7 +88,8 @@ def generateSeedXml(agoItem):
     except Exception as B:
         # print (B)
         pass
-    return metaDataFile
+    else:
+        return metaDataFile
 
 
 def updateXml(seedFile, row):
@@ -347,8 +348,8 @@ if __name__ =='__main__':
                             updateXml(metaDataFile, row=False)
                         
 
-        #removes the file file metadata.xml that essentially just a temportary staging file
-        os.remove('metadata.xml')
+        #removes the file metadata.xml that essentially just a temportary staging file
+        # os.remove('metadata.xml')
         
         print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
         if failCount > 0:
@@ -368,11 +369,6 @@ if __name__ =='__main__':
 
     else:
         print ("Missing parameter. You must choose to use -c to create a csv or -m to create metadata")
-
-
-
-
-
 
 
 
