@@ -336,7 +336,7 @@ if __name__ =='__main__':
                             print("an error occured while creating the csv")
                             pass
 
-                    except Exception as E:
+                    except (AttributeError):
                         failCount += 1
                         pass
 
