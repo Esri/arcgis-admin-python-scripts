@@ -8,7 +8,7 @@ To run the script you'll need to install the following dependencies.
 
 * Python 3 [Install instructions](https://www.continuum.io/downloads)
 * Conda and ArcGIS package [Install instructions](https://developers.arcgis.com/python/guide/Install-and-set-up/)
-* Clone the repo - ```git clone git@github.com:ArcGIS/python-admin.git```
+* Clone the repo - ```git clone git@github.com:Esri/arcgis-admin-python-scripts.git```
 
 Note: There is no universal installation of Python 3 currently so you will have to be sure that you're calling the exact same version of python 3 where you installed the ArcGIS Beta API. Using the command `which python3` will return the path to your current default python 3, and is a useful tool for verifying. The python 3 version you want to use for this script should be in your ```/anaconda/bin``` directory, similar to below.
 
