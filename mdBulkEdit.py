@@ -86,7 +86,7 @@ def generateSeedXml(agoItem):
         # os.remove(metaDataFile)
 
     except Exception as B:
-        print (B)
+        # print (B)
         pass
     return metaDataFile
 
@@ -262,6 +262,7 @@ if __name__ =='__main__':
 
     try:
         admin = gis.users.get(username)
+        print('\nGathering items for {}. This can take several minutes depending on the number of items in your org...'.format(username))
         allItems = admin.content()
     except Exception as e:
         pass
@@ -337,14 +338,14 @@ if __name__ =='__main__':
 
                     except Exception as E:
                         failCount += 1
-                        print(E)
-
-                        #generates seed metadata if the script is unable to access the current metadata
-                        metaDataFile = generateSeedXml(item)
-                        print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
-                        updateXml(metaDataFile, row=False)
                         pass
 
+                        #generates seed metadata if the script is unable to access the current metadata
+                        if generateSeedXml(item) != None:
+                            metaDataFile = generateSeedXml(item)
+                            print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
+                            updateXml(metaDataFile, row=False)
+                        
 
         #removes the file file metadata.xml that essentially just a temportary staging file
         os.remove('metadata.xml')
@@ -358,7 +359,8 @@ if __name__ =='__main__':
         try:
             bulkMdWriter()
         except Exception as fail:
-            print (fail)
+            print ('Error creating xml from csv: {}'.format(fail))
+            pass
 
     #error message if user tries to use -c and -m together
     elif args.c and args.m:
