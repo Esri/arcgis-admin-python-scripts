@@ -9,7 +9,7 @@ import csv
 import datetime
 import time
 from shutil import copyfile
-
+import pdb
 
 
 
@@ -264,7 +264,7 @@ if __name__ =='__main__':
     try:
         admin = gis.users.get(username)
         print('\nGathering items for {}. This can take several minutes depending on the number of items in your org...'.format(username))
-        allItems = admin.content()
+        # allItems = admin.content()
     except Exception as e:
         pass
     
@@ -281,94 +281,115 @@ if __name__ =='__main__':
         if reportExists == True:
             os.remove('metaDataTable.csv')
 
-        #loops through every item in every folder in search of public open data items
-        for folder in allItems:
-            for item in allItems[folder]:
-                if item.licenseInfo and item.access == 'public':
-                    totalCount+=1
 
-                    try:
-                        metaDataFile = item.download_metadata(dir=os.getcwd())
-                        metaDataFile = os.path.abspath(metaDataFile)
+        # gathers all items in the root director
+        allItems = admin.items()
 
-                        #checks if downloaded folder exists, and creates if it does not
-                        if not os.path.exists('downloaded'):
-                            os.makedirs('downloaded')
-        
-                        newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
-                        
-                        #parses the xml file and assigns the root element
-                        dom = etree.parse(newFile)
-                        root = dom.getroot()
-                        
-                        print ("{}. {} downloaded successfully".format(totalCount, item.title))
-                        successCount+=1
+        #loops through every folder in the root directory and adds the valid items to the list of items gathered from the root directory
+        for folder in admin.folders:
+            x = folder['title']
+            folderItems = admin.items(folder=x, max_items=5000)
+            allItems.extend(folderItems)
 
-                        #a dictionary holidng the fieldnames for the csv
-                        fieldnames = {'ArcGISProfile':'None', 'ArcGISstyle':'None', 'ArcGISFormat':'1.0',
+            
+        for item in allItems:
+            if item.access == 'public': #removed item.licenseInfo condition check
+                totalCount+=1
+
+                try:
+                    metaDataFile = item.download_metadata(save_folder=os.getcwd())
+                    metaDataFile = os.path.abspath(metaDataFile)
+
+                    #checks if downloaded folder exists, and creates if it does not
+                    if not os.path.exists('downloaded'):
+                        os.makedirs('downloaded')
+    
+                    newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
+                    
+                    #parses the xml file and assigns the root element
+                    dom = etree.parse(newFile)
+                    root = dom.getroot()
+                    
+                    print ("{}. {} downloaded successfully".format(totalCount, item.title))
+                    successCount+=1
+
+                    #a dictionary holidng the fieldnames for the csv
+                    
+                    fieldnames = ['resTitle','mdFileID','useLimit','keyword','ArcGISFormat','CreaDate','CreaTime',
+                                    'ModTime','idAbs','ArcGISstyle','mdDateSt','metadata','ArcGISProfile',
+                                    'PublishStatus','ModDate','CharSetCd','RoleCd']
+
+
+                    fields = {'ArcGISProfile':'None', 'ArcGISstyle':'None', 'ArcGISFormat':'1.0',
                                     'CreaDate':'None', 'mdDateSt':'None', 'CreaTime':'None',
                                     'useLimit':'None', 'resTitle':'None', 'metadata':'None', 'ModTime':'None',
                                     'mdFileID':'None', 'keyword':'None', 'ModDate':'None', 'PublishStatus':'None', 
                                     'RoleCd':'None', 'CharSetCd':'None', 'idAbs': 'None'}
 
 
+                    
+
+                    for item in fieldnames:
                         for xmlFld in root.iter(): 
-                            try:
-                                if xmlFld.tag in fieldnames and xmlFld.text.isspace() != True:
-                                    fieldnames[xmlFld.tag] = xmlFld.text
-                                else:
+                            if xmlFld.tag == item:
+                                try:
+                                    fields[item] = xmlFld.text
+                            
+                                except:
                                     pass
-                
-                            except:
+                            else:
                                 pass
+                                
+            
+                    # pdb.set_trace()
 
-                        #checks thst the csvfile currently exists, to decide if a header row needs to be printed        
-                        reportExists = os.path.isfile('metaDataTable.csv')
-                        try:
-                            with open('metaDataTable.csv', 'a') as csvfile:
-                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='None', extrasaction='ignore', dialect='excel')
-                                if reportExists == False:
-                                    writer.writeheader()
-                                    writer.writerow(fieldnames)
-                                else:
-                                    writer.writerow(fieldnames)
-                                    pass
-                        except:
-                            print("an error occured while creating the csv")
-                            pass
-
-                    except (AttributeError):
-                        failCount += 1
+                    #checks that the csvfile currently exists, to decide if a header row needs to be printed        
+                    reportExists = os.path.isfile('metaDataTable.csv')
+                    try:
+                        with open('metaDataTable.csv', 'a') as csvfile:
+                            writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='None', extrasaction='ignore', dialect='excel')
+                            if reportExists == False:
+                                writer.writeheader()
+                                writer.writerow(fields)
+                            else:
+                                writer.writerow(fields)
+                                pass
+                    except:
+                        print("an error occured while creating the csv")
                         pass
 
-                        #generates seed metadata if the script is unable to access the current metadata
-                        if generateSeedXml(item) != None:
-                            metaDataFile = generateSeedXml(item)
-                            print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
-                            updateXml(metaDataFile, row=False)
-                        
+                except (AttributeError):
+                    failCount += 1
+                    pass
 
-        #removes the file metadata.xml that essentially just a temportary staging file
-        # os.remove('metadata.xml')
-        
-        print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
-        if failCount > 0:
-            print("{} had to be generated. Run the script with the -c flag again.".format(failCount))
+                    #generates seed metadata if the script is unable to access the current metadata
+                    if generateSeedXml(item) != None:
+                        metaDataFile = generateSeedXml(item)
+                        print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
+                        updateXml(metaDataFile, row=False)
+                    
+
+    #removes the file metadata.xml that essentially just a temportary staging file
+    os.remove('metadata.xml')
     
-    #if the -m flag is set and valid, the function to create valid xml files from the csv is called
-    elif args.m and not args.c:
-        try:
-            bulkMdWriter()
-        except Exception as fail:
-            print ('Error creating xml from csv: {}'.format(fail))
-            pass
+    print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
+    if failCount > 0:
+        print("{} had to be generated. Run the script with the -c flag to access an up-to-date csv of your items, including any that were just generated.".format(failCount))
 
-    #error message if user tries to use -c and -m together
-    elif args.c and args.m:
-        print("Invalid entry. You can't use -c and -m at the same time.")
+#if the -m flag is set and valid, the function to create valid xml files from the csv is called
+elif args.m and not args.c:
+    try:
+        bulkMdWriter()
+    except Exception as fail:
+        print ('Error creating xml from csv: {}'.format(fail))
+        pass
 
-    else:
-        print ("Missing parameter. You must choose to use -c to create a csv or -m to create metadata")
+#error message if user tries to use -c and -m together
+elif args.c and args.m:
+    print("Invalid entry. You can't use -c and -m at the same time.")
+
+else:
+    print ("Missing parameter. You must choose to use -c to create a csv or -m to create metadata")
 
 
 
