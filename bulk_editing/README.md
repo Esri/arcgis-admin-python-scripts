@@ -16,19 +16,19 @@ flags script accepts:
  * `python3 mdBulkEdit.py -u <username> -p <password> -a http://www.arcgis.com -m`
 
 
- #1. Clone the repo or copy the code from the script and save it to a `.py` file on your local system.
- #1. Run the script with the `-c` as shown above, to have the script generate a csv of your public items. 
- 	* Depending on what the script finds, it may instruct you to run it again with the `-c` flag a second time.
- 	* This will also generate other files that the script needs to run properly. This is inludes a directory named 'downloaded' and metadata files for each item in the csv file. These  are essentially temporary files and can be deleted once the script has
- 	finished generating the csv.
- #1. Edit the fields in the csv as needed, being careful to never manually edit the mdFileID field ever.
+ 1. Clone the repo or copy the code from the script and save it to a `.py` file on your local system.
+
+ 1. Run the script with the `-c` as shown above, to have the script generate a csv of your public items. 
+ 		* Depending on what the script finds, it may instruct you to run it again with the `-c` flag a second time.
+ 		* This will also generate other files that the script needs to run properly. This is inludes a directory named 'downloaded' and metadata files for each item in the csv file. These  are essentially temporary files and can be deleted once the script has finished generating the csv.
+ 1. Edit the fields in the csv as needed, being careful to never manually edit the mdFileID field ever.
  	* resTitle = Title
  	* useLimit = License
  	* key word = tags
  	* idAbs = description
- #1. Save your edited csv in the same directory as the script.
- #1. When you're ready to push your edits to your online account, run the script again, but this time with the `-m` flag.
- #1 Once the script is finished, confirm that the changes you made are reflected in your online items.
+ 1. Save your edited csv in the same directory as the script.
+ 1. When you're ready to push your edits to your online account, run the script again, but this time with the `-m` flag.
+ 1. Once the script is finished, confirm that the changes you made are reflected in your online items.
 
 
 

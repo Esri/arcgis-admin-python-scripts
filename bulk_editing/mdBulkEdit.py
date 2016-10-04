@@ -9,7 +9,6 @@ import csv
 import datetime
 import time
 from shutil import copyfile
-import pdb
 
 
 
@@ -267,14 +266,15 @@ if __name__ =='__main__':
         # allItems = admin.content()
     except Exception as e:
         pass
+    #counters
+    totalCount = 0
+    failCount = 0
+    successCount = 0
     
     #checks the flags entered by the user
     if args.c and not args.m:
         
-        #counters
-        totalCount = 0
-        failCount = 0
-        successCount = 0
+        
         reportExists = os.path.isfile('metaDataTable.csv')
 
         #removes the old csv if it exists and the user wants to generate a new one
@@ -341,8 +341,6 @@ if __name__ =='__main__':
                                 pass
                                 
             
-                    # pdb.set_trace()
-
                     #checks that the csvfile currently exists, to decide if a header row needs to be printed        
                     reportExists = os.path.isfile('metaDataTable.csv')
                     try:
@@ -369,27 +367,27 @@ if __name__ =='__main__':
                         updateXml(metaDataFile, row=False)
                     
 
-    #removes the file metadata.xml that essentially just a temportary staging file
-    os.remove('metadata.xml')
-    
-    print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
+        #removes the file metadata.xml that essentially just a temportary staging file
+        os.remove('metadata.xml')
+        
+        print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
     if failCount > 0:
         print("{} had to be generated. Run the script with the -c flag to access an up-to-date csv of your items, including any that were just generated.".format(failCount))
 
-#if the -m flag is set and valid, the function to create valid xml files from the csv is called
-elif args.m and not args.c:
-    try:
-        bulkMdWriter()
-    except Exception as fail:
-        print ('Error creating xml from csv: {}'.format(fail))
-        pass
+    #if the -m flag is set and valid, the function to create valid xml files from the csv is called
+    elif args.m and not args.c:
+        try:
+            bulkMdWriter()
+        except Exception as fail:
+            print ('Error creating xml from csv: {}'.format(fail))
+            pass
 
-#error message if user tries to use -c and -m together
-elif args.c and args.m:
-    print("Invalid entry. You can't use -c and -m at the same time.")
+    #error message if user tries to use -c and -m together
+    elif args.c and args.m:
+        print("Invalid entry. You can't use -c and -m at the same time.")
 
-else:
-    print ("Missing parameter. You must choose to use -c to create a csv or -m to create metadata")
+    else:
+        print ("Missing parameter. You must choose to use -c to create a csv or -m to create metadata")
 
 
 

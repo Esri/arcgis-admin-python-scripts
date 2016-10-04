@@ -12,6 +12,13 @@ To run the script you'll need to install the following dependencies.
 
 Note: There is no universal installation of Python 3 currently so you will have to be sure that you're calling the exact same version of python 3 where you installed the ArcGIS Beta API. Using the command `which python3` will return the path to your current default python 3, and is a useful tool for verifying. The python 3 version you want to use for this script should be in your ```/anaconda/bin``` directory, similar to below.
 
+##Updating Anaconda
+If the Python api has been updated to a new relese since you downloaded it and you want to update to the current version, perform these 3 steps:
+  
+  1.  open a termimal
+  1.  enter the command `conda update -c esri arcgis`
+  1.  confirm you want to update the require packages
+
 ```
 bash-3.2$ which python3
 /Users/<user_name>/anaconda/bin/python3
@@ -84,10 +91,10 @@ Feel free to submit issues and enhancement requests.
 Please refer to each project's style guidelines and guidelines for submitting patches and additions. In general, we follow the "fork-and-pull" Git workflow.
 
  1. **Fork** the repo on GitHub
- 2. **Clone** the project to your own machine
- 3. **Commit** changes to your own branch
- 4. **Push** your work back up to your fork
- 5. Submit a **Pull request** so that we can review your changes
+ 1. **Clone** the project to your own machine
+ 1. **Commit** changes to your own branch
+ 1. **Push** your work back up to your fork
+ 1. Submit a **Pull request** so that we can review your changes
 
 NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 
