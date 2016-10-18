@@ -31,6 +31,27 @@ flags script accepts:
  1. Once the script is finished, confirm that the changes you made are reflected in your online items.
 
 
+| __Category__ | __Value__ | __Role__ | __Value__ | __Update Frequency__| __Value__|                                   
+|----------  |---------|-----------|-------------|---------|-----------|                    
+|Farming     | 001     |Resource Provider| 001|Daily    | 001|
+|Biota       | 002     |Custodian| 002     |Weekly      | 002     |
+|Boundaries  | 003     |Owner    | 003     |Fortnightly | 003     |
+|Atmospheric Sciences| 004|User  | 004     |Monthly     | 004     |
+|Economy     | 005     |Distributor| 005   |Quarterly   | 005     |
+|Elevation   | 006     |Originator | 006   |Biannually  | 006     |
+|Environment | 007     |Point of Contact| 007|Annually  | 007     |
+|Geoscientific| 008    |Principal Investigator| 008   |As Needed  | 008|
+|Health      | 009     |Processor  |009    |Irregular   | 009     |
+|Imagery and Basemaps| 010|Publisher  | 010   |Not Planned | 010|
+|Military Intelligence| 011|Author    | 011   |Unknown  | 011|
+|Inland Waters| 012    |
+|Locations   | 013     |
+|Oceans      | 014     |
+|Planning & Cadastral| 015|
+|Society     | 016     |
+|Structure   | 017     |
+|Transportation| 018   |
+|Utilities and Communications| 019|
 
 ##Contributing
 
