@@ -260,12 +260,7 @@ if __name__ =='__main__':
 
     gis = GIS(url=portal, username=username, password=password)
 
-    try:
-        admin = gis.users.get(username)
-        print('\nGathering items for {}. This can take several minutes depending on the number of items in your org...'.format(username))
-        # allItems = admin.content()
-    except Exception as e:
-        pass
+    
     #counters
     totalCount = 0
     failCount = 0
@@ -273,6 +268,11 @@ if __name__ =='__main__':
     
     #checks the flags entered by the user
     if args.c and not args.m:
+        try:
+            admin = gis.users.get(username)
+            print('\nGathering items for {}. This can take several minutes depending on the number of items in your org...'.format(username))
+        except Exception as e:
+            pass
         
         
         reportExists = os.path.isfile('metaDataTable.csv')
