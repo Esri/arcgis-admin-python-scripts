@@ -11,6 +11,8 @@ import time
 from shutil import copyfile
 
 
+import pdb
+
 
 def generateSeedXml(agoItem):
     '''
@@ -49,8 +51,8 @@ def generateSeedXml(agoItem):
 
         #ESRI 
         Esri = etree.SubElement(root, "Esri")
-        ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
-        ArcGISstyle.text = "ISO 19139 Metadata Implementation Specification" #needs to go in the dictionary
+        # ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
+        # ArcGISstyle.text = "ISO 19139 Metadata Implementation Specification" #needs to go in the dictionary
 
        
         ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
@@ -85,7 +87,6 @@ def generateSeedXml(agoItem):
         # os.remove(metaDataFile)
 
     except Exception as B:
-        # print (B)
         pass
     else:
         return metaDataFile
@@ -136,12 +137,22 @@ def bulkMdWriter():
                 root = etree.Element("metadata")
                 dataIdInfo = etree.SubElement(root, "dataIdInfo")
                 idCitation = etree.SubElement(dataIdInfo, "idCitation")
+                idPoc = etree.SubElement(dataIdInfo, "idPoc")
+
+
                 
                 resTitle = etree.SubElement(idCitation, "resTitle")
                 resTitle.text = row['resTitle']
 
+                reviseDate = etree.SubElement(idCitation, "reviseDate")
+                reviseDate.text = row['reviseDate']
+
                 date = etree.SubElement(idCitation, "date")
                 pubDate = etree.SubElement(date, "pubDate")
+
+                rpIndName = etree.SubElement(idPoc, "rpIndName")
+                rpIndName.text = row['rpIndName']
+                
 
                 
                 if row['idAbs']:
@@ -179,26 +190,26 @@ def bulkMdWriter():
 
                     #ESRI 
                     Esri = etree.SubElement(root, "Esri")
-                    ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
-                    ArcGISstyle.text = row['ArcGISstyle']
+                    # ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
+                    # ArcGISstyle.text = row['ArcGISstyle']
 
                     CreaDate = etree.SubElement(Esri, "CreaDate")
                     CreaDate.text = row['CreaDate']
 
-                    CreaTime = etree.SubElement(Esri, "CreaTime")
-                    CreaTime.text = row['CreaTime']
+                    # CreaTime = etree.SubElement(Esri, "CreaTime")
+                    # CreaTime.text = row['CreaTime']
 
                     ModDate = etree.SubElement(Esri, "ModDate")
                     ModDate.text = row['ModDate']
 
-                    ModTime = etree.SubElement(Esri, "ModTime")
-                    ModTime.text = row['ModTime']
+                    # ModTime = etree.SubElement(Esri, "ModTime")
+                    # ModTime.text = row['ModTime']
 
                     ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
                     ArcGISFormat.text = "1.0"
 
-                    ArcGISProfile = etree.SubElement(Esri, "ArcGISProfile")
-                    ArcGISProfile.text = row['ArcGISProfile']
+                    # ArcGISProfile = etree.SubElement(Esri, "ArcGISProfile")
+                    # ArcGISProfile.text = row['ArcGISProfile']
 
                     mdDateSt = etree.SubElement(root, "mdDateSt")
 
@@ -239,6 +250,7 @@ def bulkMdWriter():
             except Exception as B:
                 print(B)
                 pass
+    pdb.set_trace()
     return
 
 
@@ -282,7 +294,7 @@ if __name__ =='__main__':
             os.remove('metaDataTable.csv')
 
 
-        # gathers all items in the root director
+        # gathers all items in the root directory
         allItems = admin.items()
 
         #loops through every folder in the root directory and adds the valid items to the list of items gathered from the root directory
@@ -293,12 +305,23 @@ if __name__ =='__main__':
 
             
         for item in allItems:
-            if item.access == 'public': #removed item.licenseInfo condition check
+            if item.access == 'public':
                 totalCount+=1
 
                 try:
                     metaDataFile = item.download_metadata(save_folder=os.getcwd())
                     metaDataFile = os.path.abspath(metaDataFile)
+                    
+                    with open (metaDataFile) as metaCheck:
+                        try:
+                            jsonCheck = json.loads(metaCheck.readline())
+
+                            if jsonCheck['error']['message'] == 'Metadata for item not found':
+                                raise AttributeError('Bad Metadata')
+                            else:
+                                print("nope")
+                        except:
+                            pass
 
                     #checks if downloaded folder exists, and creates if it does not
                     if not os.path.exists('downloaded'):
@@ -306,28 +329,51 @@ if __name__ =='__main__':
     
                     newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
                     
-                    #parses the xml file and assigns the root element
-                    dom = etree.parse(newFile)
-                    root = dom.getroot()
+
                     
+                    #parses the xml file and assigns the root element
+                    try:
+                        dom = etree.parse(newFile) 
+                        root = dom.getroot()
+                    except:
+                        pdb.set_trace()
+                    
+
                     print ("{}. {} downloaded successfully".format(totalCount, item.title))
                     successCount+=1
 
                     #a dictionary holidng the fieldnames for the csv
-                    
-                    fieldnames = ['resTitle','mdFileID','useLimit','keyword','ArcGISFormat','CreaDate','CreaTime',
-                                    'ModTime','idAbs','ArcGISstyle','mdDateSt','metadata','ArcGISProfile',
-                                    'PublishStatus','ModDate','CharSetCd','RoleCd']
+                    fieldnames = [  'resTitle',
+                                    'mdFileID',
+                                    'useLimit',
+                                    'keyword',
+                                    'CreaDate',
+                                    'idAbs',
+                                    'ModDate',
+                                    'CharSetCd',
+                                    'RoleCd', 
+                                    'TopicCatCd',
+                                    'reviseDate',
+                                    'rpIndName', 
+                                    'EmailAdd',
+                                    'MaintFreqCd']
 
 
-                    fields = {'ArcGISProfile':'None', 'ArcGISstyle':'None', 'ArcGISFormat':'1.0',
-                                    'CreaDate':'None', 'mdDateSt':'None', 'CreaTime':'None',
-                                    'useLimit':'None', 'resTitle':'None', 'metadata':'None', 'ModTime':'None',
-                                    'mdFileID':'None', 'keyword':'None', 'ModDate':'None', 'PublishStatus':'None', 
-                                    'RoleCd':'None', 'CharSetCd':'None', 'idAbs': 'None'}
+                    fields = {  'TopicCatCd':'None', 
+                                'rpIndName':'None',
+                                'reviseDate':'None',
+                                'CreaDate':'None',
+                                'mdDateSt':'None',
+                                'MaintFreqCd':'None',
+                                'useLimit':'None', 
+                                'resTitle':'None', 
+                                'mdFileID':'None', 
+                                'keyword':'None', 
+                                'ModDate':'None', 
+                                'RoleCd':'None', 
+                                'CharSetCd':'None', 
+                                'idAbs': 'None'}
 
-
-                    
 
                     for item in fieldnames:
                         for xmlFld in root.iter(): 
@@ -371,8 +417,8 @@ if __name__ =='__main__':
         os.remove('metadata.xml')
         
         print ("\n{} / {} downloaded successfully.".format(successCount, totalCount))
-    if failCount > 0:
-        print("{} had to be generated. Run the script with the -c flag to access an up-to-date csv of your items, including any that were just generated.".format(failCount))
+        if failCount > 0:
+            print("{} had to be generated. Run the script with the -c flag to access an up-to-date csv of your items, including any that were just generated.".format(failCount))
 
     #if the -m flag is set and valid, the function to create valid xml files from the csv is called
     elif args.m and not args.c:
