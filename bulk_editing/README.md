@@ -33,18 +33,18 @@ flags script accepts:
 
 | __Category__ | __Value__ | __Role__ | __Value__ | __Update Frequency__| __Value__|                                   
 |----------  |---------|-----------|-------------|---------|-----------|                    
-|Farming     | 001     |Resource Provider| 001|Daily    | 001|
-|Biota       | 002     |Custodian| 002     |Weekly      | 002     |
-|Boundaries  | 003     |Owner    | 003     |Fortnightly | 003     |
-|Atmospheric Sciences| 004|User  | 004     |Monthly     | 004     |
-|Economy     | 005     |Distributor| 005   |Quarterly   | 005     |
-|Elevation   | 006     |Originator | 006   |Biannually  | 006     |
-|Environment | 007     |Point of Contact| 007|Annually  | 007     |
-|Geoscientific| 008    |Principal Investigator| 008   |As Needed  | 008|
-|Health      | 009     |Processor  |009    |Irregular   | 009     |
-|Imagery and Basemaps| 010|Publisher  | 010   |Not Planned | 010|
-|Military Intelligence| 011|Author    | 011   |Unknown  | 011|
-|Inland Waters| 012    |
+|Farming     | 001     |Resource Provider| 001|Continual    | 001|
+|Biota       | 002     |Custodian| 002     |Daily      | 002     |
+|Boundaries  | 003     |Owner    | 003     |Weekly | 003     |
+|Atmospheric Sciences| 004|User  | 004     |Fortnightly     | 004     |
+|Economy     | 005     |Distributor| 005   |Monthly   | 005     |
+|Elevation   | 006     |Originator | 006   |Quarterly  | 006     |
+|Environment | 007     |Point of Contact| 007|Biannually  | 007     |
+|Geoscientific| 008    |Principal Investigator| 008   |Annually  | 008|
+|Health      | 009     |Processor  |009    |As Needed   | 009     |
+|Imagery and Basemaps| 010|Publisher  | 010   |Irregular| 010|
+|Military Intelligence| 011|Author    | 011   |Not Planned  | 011|
+|Inland Waters| 012    |              |       |Unknown      | 012|   
 |Locations   | 013     |
 |Oceans      | 014     |
 |Planning & Cadastral| 015|
