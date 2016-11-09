@@ -7,10 +7,8 @@ from lxml import etree
 from arcgis.gis import GIS
 import csv
 import datetime
-import time
+from time import strftime
 from shutil import copyfile
-
-
 import pdb
 
 
@@ -27,6 +25,7 @@ def generateSeedXml(agoItem):
         resTitle = etree.SubElement(idCitation, "resTitle")
         resTitle.text = agoItem.title
         
+        #might need to remove nesting on line below
         if agoItem.description:
             idAbs = etree.SubElement(dataIdInfo, "idAbs")
             idAbs.text = agoItem.description
@@ -42,7 +41,7 @@ def generateSeedXml(agoItem):
                 keyword = etree.SubElement(searchKeys, "keyword")
                 keyword.text = agoItem.tags
 
-        
+
         resConst = etree.SubElement(idCitation, "resConst")
         Consts = etree.SubElement(resConst, "Consts")
         useLimit = etree.SubElement(Consts, "useLimit")
@@ -51,20 +50,12 @@ def generateSeedXml(agoItem):
 
         #ESRI 
         Esri = etree.SubElement(root, "Esri")
-        # ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
-        # ArcGISstyle.text = "ISO 19139 Metadata Implementation Specification" #needs to go in the dictionary
-
-       
         ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
         ArcGISFormat.text = "1.0"
         ArcGISProfile = etree.SubElement(Esri, "ArcGISProfile")
-
-
         mdDateSt = etree.SubElement(root, "mdDateSt")
         mdFileID = etree.SubElement(root, "mdFileID")
-        mdFileID.text = agoItem.itemid
-
-        
+        mdFileID.text = agoItem.itemid        
         mdContact = etree.SubElement(root, "mdContact")
         rpOrgName = etree.SubElement(root, "rpOrgName")
 
@@ -106,7 +97,6 @@ def updateXml(seedFile, row):
     if row:
         item_properties = {'title':row['resTitle'], 'tags':row['keyword'], 
                         'description':row['idAbs'], 'licenseInfo':row['useLimit']}
-        
         try:
             item = gis.content.get(itemId)
         except Exception as e:
@@ -133,124 +123,125 @@ def bulkMdWriter():
 
         for row in reader:
             try:
-                count += 1
                 root = etree.Element("metadata")
                 dataIdInfo = etree.SubElement(root, "dataIdInfo")
                 idCitation = etree.SubElement(dataIdInfo, "idCitation")
                 idPoc = etree.SubElement(dataIdInfo, "idPoc")
-
-
                 
+                # update frequency metadata
+                resMaint = etree.SubElement(dataIdInfo, "resMaint")
+                maintFreq = etree.SubElement(resMaint, "maintFreq")
+                MaintFreqCd = etree.SubElement(maintFreq, "MaintFreqCd")
+                MaintFreqCd.set("value", row['MaintFreqCd'])
+
+                #update title
                 resTitle = etree.SubElement(idCitation, "resTitle")
                 resTitle.text = row['resTitle']
 
+                #update revision data
                 reviseDate = etree.SubElement(idCitation, "reviseDate")
                 reviseDate.text = row['reviseDate']
 
+                #update published date
                 date = etree.SubElement(idCitation, "date")
                 pubDate = etree.SubElement(date, "pubDate")
+
 
                 rpIndName = etree.SubElement(idPoc, "rpIndName")
                 rpIndName.text = row['rpIndName']
                 
+        
+                # if row['idAbs']:
+                idAbs = etree.SubElement(dataIdInfo, "idAbs")
+                idAbs.text = row['idAbs']
+
+                dataLang = etree.SubElement(idCitation, "dataLang")
+                languageCode = etree.SubElement(dataLang, "languageCode")
+                languageCode.set("value", "eng")
+
+
+                dataChar = etree.SubElement(idCitation, "dataChar")
+                CharSetCd = etree.SubElement(dataChar, "CharSetCd")
+                CharSetCd.set("value","004" )
+
+                tpCat = etree.SubElement(idCitation, "tpCat")
+                TopicCatCd = etree.SubElement(tpCat, "TopicCatCd")
+
+                searchKeys = etree.SubElement(idCitation, "searchKeys")
+                if row['keyword']:
+                    if type(row['keyword']) == list:
+                        for tag in row['keyword']:
+                            keyword = etree.SubElement(searchKeys, "keyword")
+                            keyword.text = tag
+                    else:
+                        keyword = etree.SubElement(searchKeys, "keyword")
+                        keyword.text = row['keyword']
 
                 
-                if row['idAbs']:
-                    idAbs = etree.SubElement(dataIdInfo, "idAbs")
-                    idAbs.text = row['idAbs']
+                resConst = etree.SubElement(idCitation, "resConst")
+                Consts = etree.SubElement(resConst, "Consts")
+                useLimit = etree.SubElement(Consts, "useLimit")
+                if row['useLimit']:
+                    useLimit.text = row['useLimit']
 
-                    dataLang = etree.SubElement(idCitation, "dataLang")
-                    languageCode = etree.SubElement(dataLang, "languageCode")
-                    languageCode.set("value", "eng")
+                #ESRI 
+                Esri = etree.SubElement(root, "Esri")
+                # ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
+                # ArcGISstyle.text = row['ArcGISstyle']
+
+                CreaDate = etree.SubElement(Esri, "CreaDate")
+                CreaDate.text = row['CreaDate']
 
 
-                    dataChar = etree.SubElement(idCitation, "dataChar")
-                    CharSetCd = etree.SubElement(dataChar, "CharSetCd")
-                    CharSetCd.set("value","004" )
 
-                    tpCat = etree.SubElement(idCitation, "tpCat")
-                    TopicCatCd = etree.SubElement(tpCat, "TopicCatCd")
+                ModDate = etree.SubElement(Esri, "ModDate")
+                ModDate.text = row['ModDate']
 
-                    searchKeys = etree.SubElement(idCitation, "searchKeys")
-                    if row['keyword']:
-                        if type(row['keyword']) == list:
-                            for tag in row['keyword']:
-                                keyword = etree.SubElement(searchKeys, "keyword")
-                                keyword.text = tag
-                        else:
-                            keyword = etree.SubElement(searchKeys, "keyword")
-                            keyword.text = row['keyword']
 
-                    
-                    resConst = etree.SubElement(idCitation, "resConst")
-                    Consts = etree.SubElement(resConst, "Consts")
-                    useLimit = etree.SubElement(Consts, "useLimit")
-                    if row['useLimit']:
-                        useLimit.text = row['useLimit']
+                ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
+                ArcGISFormat.text = "1.0"
 
-                    #ESRI 
-                    Esri = etree.SubElement(root, "Esri")
-                    # ArcGISstyle = etree.SubElement(Esri, "ArcGISstyle")
-                    # ArcGISstyle.text = row['ArcGISstyle']
 
-                    CreaDate = etree.SubElement(Esri, "CreaDate")
-                    CreaDate.text = row['CreaDate']
 
-                    # CreaTime = etree.SubElement(Esri, "CreaTime")
-                    # CreaTime.text = row['CreaTime']
+                mdDateSt = etree.SubElement(root, "mdDateSt")
 
-                    ModDate = etree.SubElement(Esri, "ModDate")
-                    ModDate.text = row['ModDate']
+                mdFileID = etree.SubElement(root, "mdFileID")
+                mdFileID.text = row['mdFileID']
 
-                    # ModTime = etree.SubElement(Esri, "ModTime")
-                    # ModTime.text = row['ModTime']
+                mdChar = etree.SubElement(root, "mdChar")
+                CharSetCd = etree.SubElement(mdChar, "CharSetCd")
+                CharSetCd.set("value", "004")
 
-                    ArcGISFormat = etree.SubElement(Esri, "ArcGISFormat")
-                    ArcGISFormat.text = "1.0"
+                mdContact = etree.SubElement(root, "mdContact")
+                rpOrgName = etree.SubElement(root, "rpOrgName")
 
-                    # ArcGISProfile = etree.SubElement(Esri, "ArcGISProfile")
-                    # ArcGISProfile.text = row['ArcGISProfile']
+                role = etree.SubElement(root, "role")
+                RoleCd = etree.SubElement(role, "RoleCd")
+                RoleCd.set("value", "007")
 
-                    mdDateSt = etree.SubElement(root, "mdDateSt")
+                tree = etree.tostring(root, pretty_print=True)
+                
+                #writes the formatted xml to a file
+                with open("{}_metadata.xml".format(row['resTitle']), "wb") as fh:
+                    fh.write(tree)
+                    fh.close()
 
-                    mdFileID = etree.SubElement(root, "mdFileID")
-                    mdFileID.text = row['mdFileID']
+                metaDataFile = os.path.abspath('{}_metadata.xml'.format(row['resTitle']))
 
-                    mdChar = etree.SubElement(root, "mdChar")
-                    CharSetCd = etree.SubElement(mdChar, "CharSetCd")
-                    CharSetCd.set("value", "004")
+                '''renames and copies the metadata file to the downloaded directory and optionally
+                   removes the original file
+                '''
+                #uploads the more robust metadata as read from the csv
+                updateXml(metaDataFile, row)
 
-                    mdContact = etree.SubElement(root, "mdContact")
-                    rpOrgName = etree.SubElement(root, "rpOrgName")
-
-                    role = etree.SubElement(root, "role")
-                    RoleCd = etree.SubElement(role, "RoleCd")
-                    RoleCd.set("value", "007")
-
-                    tree = etree.tostring(root, pretty_print=True)
-                    
-                    #writes the formatted xml to a file
-                    with open("{}_metadata.xml".format(row['resTitle']), "wb") as fh:
-                        fh.write(tree)
-                        fh.close()
-
-                    metaDataFile = os.path.abspath('{}_metadata.xml'.format(row['resTitle']))
-
-                    '''renames and copies the metadata file to the downloaded directory and optionally
-                       removes the original file
-                    '''
-                    #uploads the more robust metadata as read from the csv
-                    updateXml(metaDataFile, row)
-
-                    #removes the metadata file once it's copied to another directory
-                    os.remove(metaDataFile)
-
-                    print('{}. {} updated'.format(count, row['resTitle']))
+                #removes the metadata file once it's copied to another directory
+                os.remove(metaDataFile)
+                count += 1
+                print('{}. {} {} updated'.format(count, row['resTitle'], row['mdFileID']))
 
             except Exception as B:
                 print(B)
                 pass
-    pdb.set_trace()
     return
 
 
@@ -278,7 +269,7 @@ if __name__ =='__main__':
     failCount = 0
     successCount = 0
     
-    #checks the flags entered by the user
+    #checks the flags entered by the user and only runs if -c is used
     if args.c and not args.m:
         try:
             admin = gis.users.get(username)
@@ -312,14 +303,22 @@ if __name__ =='__main__':
                     metaDataFile = item.download_metadata(save_folder=os.getcwd())
                     metaDataFile = os.path.abspath(metaDataFile)
                     
+                    #this block checks for items that need to have metadata generated for them 
                     with open (metaDataFile) as metaCheck:
                         try:
-                            jsonCheck = json.loads(metaCheck.readline())
-
-                            if jsonCheck['error']['message'] == 'Metadata for item not found':
-                                raise AttributeError('Bad Metadata')
-                            else:
-                                print("nope")
+                            for line in metaCheck:
+                                jsonCheck = json.loads(line)
+                                if jsonCheck['error']['message'] == 'Metadata for item not found':
+                                    print(">>>>got here", item.title)
+                                    
+                                    #generates seed metadata if the script is unable to access the current metadata
+                                    if generateSeedXml(item) != None:
+                                        metaDataFile = generateSeedXml(item)
+                                        print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
+                                        updateXml(metaDataFile, row=False)
+                    
+                                else:
+                                    print("Error encountered")
                         except:
                             pass
 
@@ -329,63 +328,66 @@ if __name__ =='__main__':
     
                     newFile = copyfile(metaDataFile, 'downloaded/{}_{}metadata.xml'.format(item.title, item.id))
                     
-
-                    
                     #parses the xml file and assigns the root element
                     try:
+                        creationDate = datetime.datetime.fromtimestamp(item.created/1000)
+                        creationDate = creationDate.strftime('%Y%m%d')
+
                         dom = etree.parse(newFile) 
                         root = dom.getroot()
+
+
+                        print ("{}. {} - {} downloaded successfully".format(totalCount, item.id, item.title))
+                        successCount+=1
+
+                        #a dictionary holding the fieldnames for the csv
+                        fieldnames = [  'resTitle',
+                                        'mdFileID',
+                                        'useLimit',
+                                        'keyword',
+                                        'CreaDate',
+                                        'idAbs',
+                                        'ModDate',
+                                        'CharSetCd',
+                                        'RoleCd', 
+                                        'TopicCatCd',
+                                        'reviseDate',
+                                        'rpIndName', 
+                                        'EmailAdd',
+                                        'MaintFreqCd']
+
+
+                        fields = {  'TopicCatCd':'None', 
+                                    'rpIndName':'None',
+                                    'reviseDate':'None',
+                                    'CreaDate':creationDate,
+                                    'mdDateSt':'None',
+                                    'MaintFreqCd':'None',
+                                    'useLimit':'None', 
+                                    'resTitle':item.title, 
+                                    'mdFileID':item.id, 
+                                    'keyword':[], 
+                                    'ModDate': strftime("%x"), 
+                                    'RoleCd':'None', 
+                                    'CharSetCd':'None', 
+                                    'idAbs': 'None'}
+                        
+
+                        for f in fieldnames:
+                            for xmlFld in root.iter():
+                                if xmlFld.tag == f and xmlFld.text != 'None':
+                                    try:
+                                        fields[f] = xmlFld.text
+                                    except:
+                                        pass
+                                if type(xmlFld.tag) == list:
+                                    for tags in xmlFld.tag:
+                                        fields['keyword'].append(tags) 
+
+            
                     except:
-                        pdb.set_trace()
-                    
-
-                    print ("{}. {} downloaded successfully".format(totalCount, item.title))
-                    successCount+=1
-
-                    #a dictionary holidng the fieldnames for the csv
-                    fieldnames = [  'resTitle',
-                                    'mdFileID',
-                                    'useLimit',
-                                    'keyword',
-                                    'CreaDate',
-                                    'idAbs',
-                                    'ModDate',
-                                    'CharSetCd',
-                                    'RoleCd', 
-                                    'TopicCatCd',
-                                    'reviseDate',
-                                    'rpIndName', 
-                                    'EmailAdd',
-                                    'MaintFreqCd']
-
-
-                    fields = {  'TopicCatCd':'None', 
-                                'rpIndName':'None',
-                                'reviseDate':'None',
-                                'CreaDate':'None',
-                                'mdDateSt':'None',
-                                'MaintFreqCd':'None',
-                                'useLimit':'None', 
-                                'resTitle':'None', 
-                                'mdFileID':'None', 
-                                'keyword':'None', 
-                                'ModDate':'None', 
-                                'RoleCd':'None', 
-                                'CharSetCd':'None', 
-                                'idAbs': 'None'}
-
-
-                    for item in fieldnames:
-                        for xmlFld in root.iter(): 
-                            if xmlFld.tag == item:
-                                try:
-                                    fields[item] = xmlFld.text
-                            
-                                except:
-                                    pass
-                            else:
-                                pass
-                                
+                        totalCount-=1
+                        print(item.title)
             
                     #checks that the csvfile currently exists, to decide if a header row needs to be printed        
                     reportExists = os.path.isfile('metaDataTable.csv')
@@ -405,12 +407,6 @@ if __name__ =='__main__':
                 except (AttributeError):
                     failCount += 1
                     pass
-
-                    #generates seed metadata if the script is unable to access the current metadata
-                    if generateSeedXml(item) != None:
-                        metaDataFile = generateSeedXml(item)
-                        print (">>>>> {}. {} had to be generated.".format(totalCount, item.title))
-                        updateXml(metaDataFile, row=False)
                     
 
         #removes the file metadata.xml that essentially just a temportary staging file
